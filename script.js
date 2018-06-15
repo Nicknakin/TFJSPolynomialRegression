@@ -4,8 +4,8 @@ var realXs = [];
 var realYs = [];
 const degree = 1;
 var coefficients;
-var learningRate = 0.01;
-const optimizer = tf.train.sgd(learningRate);
+var learningRate = 0.145;
+const optimizer = tf.train.adamax(learningRate);
 
 //GLOBAL VARIABLES
 
@@ -13,13 +13,13 @@ function setup(){
 	createCanvas(800,800);
 	coefficients = new Array(degree+1);
 	for(let i = 0; i < coefficients.length; i++){
-		coefficients[i] = tf.variable(tf.scalar(Math.random()	));
+		coefficients[i] = tf.variable(tf.scalar(Math.random()*2-1));
 	}
 }
 
 function draw(){
 	drawGraph();
-	if(realXs.length != 0){
+	if(realXs.length > 1){
 		//TRAIN
 		tf.tidy(() => {
 			optimize();
@@ -27,15 +27,19 @@ function draw(){
 		
 		//DRAW Function
 		let theoryXs = [];
-		for(let i = 0; i < width; i+= width/500){
-			theoryXs.push(y);
+		for(let i = 0; i < width; i++){
+			theoryXs.push(i);
 		}
-		let theoryYs = mapArray(predict(theoryYs).dataSync(), 0, 1, height, 0);
 		
+		let theoryYs = mapArray(predict(theoryXs).dataSync(), -1, 1, height, 0);
+		for(let i = 1; i < theoryYs.length; i++){
+			line(theoryXs[i-1], theoryYs[i-1], theoryXs[i], theoryYs[i]);
+		}
+	}
 }
 
 function predict(realXs){
-	realXs = mapArray(realXs, 0, width, 0, 1);
+	realXs = mapArray(realXs, 0, width, -1, 1);
 	let zeroes = new Array(realXs.length);
 	for(let i = 0; i < zeroes.length; i++)
 		zeroes[i] = 0;
@@ -43,13 +47,12 @@ function predict(realXs){
 	let tensorYs = tf.tensor1d(zeroes);
 	for(let i = 0; i < coefficients.length; i++){
 		tensorYs = tensorYs.add(tensorXs.pow(tf.scalar(i)).mul(coefficients[i]));
-		tensorYs.print();
 	}
 	return tensorYs;
 }
 
 function calcLoss(prediction){
-	return prediction.sub(tf.tensor1d(mapArray(realYs, 0, height, 1, 0))).square().mean();
+	return prediction.sub(tf.tensor1d(mapArray(realYs, 0, height, 1, -1))).square().mean();
 }
 
 function optimize(){
@@ -57,6 +60,7 @@ function optimize(){
 }
 
 function drawGraph(){
+	background(255);
 	fill(0);
 	noStroke();
 	for(let i = 0; i < realXs.length; i++){
