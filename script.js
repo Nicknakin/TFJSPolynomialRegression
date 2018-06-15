@@ -2,9 +2,9 @@
 
 var realXs = [];
 var realYs = [];
-const degree = 1;
+const degree = 2;
 var coefficients;
-var learningRate = 0.145;
+var learningRate = 1;
 const optimizer = tf.train.adamax(learningRate);
 
 //GLOBAL VARIABLES
