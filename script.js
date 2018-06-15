@@ -1,11 +1,12 @@
 //GLOBAL VARIABLES
-
 var realXs = [];
 var realYs = [];
-const degree = 2;
 var coefficients;
-var learningRate = 1;
-const optimizer = tf.train.adamax(learningRate);
+var learningRate = 0.1;
+var dragging = false;
+
+const degree = 1;
+const optimizer = tf.train.sgd(learningRate);
 
 //GLOBAL VARIABLES
 
@@ -18,8 +19,8 @@ function setup(){
 }
 
 function draw(){
-	drawGraph();
-	if(realXs.length > 1){
+	drawGraph();	
+	if(realXs.length > 1 && !dragging){
 		//TRAIN
 		tf.tidy(() => {
 			optimize();
@@ -32,18 +33,19 @@ function draw(){
 		}
 		
 		let theoryYs = mapArray(predict(theoryXs).dataSync(), -1, 1, height, 0);
+		stroke(0,0,255);
 		for(let i = 1; i < theoryYs.length; i++){
 			line(theoryXs[i-1], theoryYs[i-1], theoryXs[i], theoryYs[i]);
 		}
 	}
 }
 
-function predict(realXs){
-	realXs = mapArray(realXs, 0, width, -1, 1);
-	let zeroes = new Array(realXs.length);
+function predict(receivedXs){
+	receivedXs = mapArray(receivedXs, 0, width, -1, 1);
+	let zeroes = new Array(receivedXs.length);
 	for(let i = 0; i < zeroes.length; i++)
 		zeroes[i] = 0;
-	let tensorXs = tf.tensor1d(realXs);
+	let tensorXs = tf.tensor1d(receivedXs);
 	let tensorYs = tf.tensor1d(zeroes);
 	for(let i = 0; i < coefficients.length; i++){
 		tensorYs = tensorYs.add(tensorXs.pow(tf.scalar(i)).mul(coefficients[i]));
@@ -52,7 +54,7 @@ function predict(realXs){
 }
 
 function calcLoss(prediction){
-	return prediction.sub(tf.tensor1d(mapArray(realYs, 0, height, 1, -1))).square().mean();
+	return tf.losses.meanSquaredError(tf.tensor1d(mapArray(realYs, 0, height, 1, -1)), prediction);
 }
 
 function optimize(){
@@ -61,14 +63,14 @@ function optimize(){
 
 function drawGraph(){
 	background(255);
-	fill(0);
+	stroke(0,0,0);
+	line(width/2,0,width/2, height);
+	line(0, height/2, width, height/2);
+	fill(255,0,0);
 	noStroke();
 	for(let i = 0; i < realXs.length; i++){
 		ellipse(realXs[i],realYs[i], 8);
 	}
-	stroke(1);
-	line(width/2,0,width/2, height);
-	line(0, height/2, width, height/2);
 	
 }
 
@@ -80,7 +82,15 @@ function mapArray(arr, min, max, newMin, newMax){
 	return tmp;
 }
 
-function mouseClicked(){
+function mousePressed(){
+	dragging = true;
+}
+
+function mouseReleased(){
+	dragging = false;
+}
+
+function mouseDragged(){
 	realXs.push(mouseX);
 	realYs.push(mouseY);
 }
