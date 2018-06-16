@@ -19,19 +19,19 @@ function setup(){
 }
 
 function draw(){
-	drawGraph();	
+	drawGraph();
 	if(realXs.length > 1 && !dragging){
 		//TRAIN
 		tf.tidy(() => {
 			optimize();
 		});
-		
+
 		//DRAW Function
 		let theoryXs = [];
 		for(let i = 0; i < width; i++){
 			theoryXs.push(i);
 		}
-		
+
 		let theoryYs = mapArray(predict(theoryXs).dataSync(), -1, 1, height, 0);
 		stroke(0,0,255);
 		for(let i = 1; i < theoryYs.length; i++){
@@ -68,7 +68,7 @@ function drawGraph(){
 	for(let i = 0; i < realXs.length; i++){
 		ellipse(realXs[i],realYs[i], 8);
 	}
-	
+
 }
 
 function mapArray(arr, min, max, newMin, newMax){
@@ -80,7 +80,8 @@ function mapArray(arr, min, max, newMin, newMax){
 }
 
 function mousePressed(){
-	dragging = true;
+realXs.push(mouseX);
+realYs.push(mouseY);
 }
 
 function mouseReleased(){
@@ -88,6 +89,6 @@ function mouseReleased(){
 }
 
 function mouseDragged(){
-	realXs.push(mouseX);
-	realYs.push(mouseY);
+	dragging = true;
+	mousePressed();
 }
