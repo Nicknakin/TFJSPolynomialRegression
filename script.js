@@ -4,9 +4,10 @@ var realYs = [];
 var coefficients;
 var learningRate = 0.1;
 var dragging = false;
+var middle = false;
 
 const degree = 2;
-const optimizer = tf.train.sgd(learningRate);
+const optimizer = tf.train.adam(learningRate);
 
 //GLOBAL VARIABLES
 
@@ -33,7 +34,7 @@ function draw(){
 		}
 
 		let theoryYs = mapArray(predict(theoryXs).dataSync(), -1, 1, height, 0);
-		stroke(0,0,255);
+		stroke(255,128,0);
 		for(let i = 1; i < theoryYs.length; i++){
 			line(theoryXs[i-1], theoryYs[i-1], theoryXs[i], theoryYs[i]);
 		}
@@ -43,9 +44,10 @@ function draw(){
 function predict(receivedXs){
 	receivedXs = mapArray(receivedXs, 0, width, -1, 1);
 	let tensorXs = tf.tensor1d(receivedXs);
-	let tensorYs = tf.zeros([receivedXs.length]);
-	for(let i = 0; i < coefficients.length; i++){
-		tensorYs = tensorYs.add(tensorXs.pow(tf.scalar(i)).mul(coefficients[i]));
+	let tensorYs = tf.zeros([receivedXs.length]).add(coefficients[0]);
+	for(let i = 1; i < coefficients.length; i++){
+			tensorYs = tensorYs.add(tensorXs.pow(tf.scalar(i)).mul(coefficients[i]));
+
 	}
 	return tensorYs;
 }
@@ -59,11 +61,11 @@ function optimize(){
 }
 
 function drawGraph(){
-	background(255);
-	stroke(0,0,0);
+	background(0);
+	stroke(255);
 	line(width/2,0,width/2, height);
 	line(0, height/2, width, height/2);
-	fill(255,0,0);
+	fill(0,128,255);
 	noStroke();
 	for(let i = 0; i < realXs.length; i++){
 		ellipse(realXs[i],realYs[i], 8);
@@ -80,8 +82,10 @@ function mapArray(arr, min, max, newMin, newMax){
 }
 
 function mousePressed(){
-realXs.push(mouseX);
-realYs.push(mouseY);
+	if(mouseX == width/2)
+		middle = true;
+	realXs.push(mouseX);
+	realYs.push(mouseY);
 }
 
 function mouseReleased(){
