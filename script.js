@@ -4,15 +4,19 @@ var realYs = [];
 var coefficients;
 var learningRate = 0.1;
 var dragging = false;
-var middle = false;
+var dashed = 2;
+var button;
 
-const degree = 2;
+const degree = 3;
 const optimizer = tf.train.adam(learningRate);
 
 //GLOBAL VARIABLES
 
 function setup(){
 	createCanvas(800,800);
+	button = createButton("Clear");
+	button.position(0, height+10);
+	button.mousePressed(() => {realXs = []; realYs = [];});
 	coefficients = new Array(degree+1);
 	for(let i = 0; i < coefficients.length; i++){
 		coefficients[i] = tf.variable(tf.scalar(Math.random()*2-1));
@@ -34,9 +38,11 @@ function draw(){
 		}
 
 		let theoryYs = mapArray(predict(theoryXs).dataSync(), -1, 1, height, 0);
+		color(255);
 		stroke(255,128,0);
-		for(let i = 1; i < theoryYs.length; i++){
-			line(theoryXs[i-1], theoryYs[i-1], theoryXs[i], theoryYs[i]);
+		strokeWeight(3);
+		for(let i = dashed; i < theoryYs.length; i+= 2*dashed){
+			line(theoryXs[i-dashed], theoryYs[i-dashed], theoryXs[i], theoryYs[i]);
 		}
 	}
 }
@@ -61,6 +67,7 @@ function optimize(){
 }
 
 function drawGraph(){
+	strokeWeight(1);
 	background(0);
 	stroke(255);
 	line(width/2,0,width/2, height);
@@ -82,10 +89,11 @@ function mapArray(arr, min, max, newMin, newMax){
 }
 
 function mousePressed(){
-	if(mouseX == width/2)
-		middle = true;
-	realXs.push(mouseX);
-	realYs.push(mouseY);
+	dragging = true;
+	if(mouseX >= 0 && mouseX < width && mouseY >= 0 && mouseY < height){
+		realXs.push(mouseX);
+		realYs.push(mouseY);
+	}
 }
 
 function mouseReleased(){
@@ -93,6 +101,5 @@ function mouseReleased(){
 }
 
 function mouseDragged(){
-	dragging = true;
 	mousePressed();
 }
