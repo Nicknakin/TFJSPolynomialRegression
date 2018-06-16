@@ -5,7 +5,7 @@ var coefficients;
 var learningRate = 0.1;
 var dragging = false;
 
-const degree = 1;
+const degree = 2;
 const optimizer = tf.train.sgd(learningRate);
 
 //GLOBAL VARIABLES
@@ -42,11 +42,8 @@ function draw(){
 
 function predict(receivedXs){
 	receivedXs = mapArray(receivedXs, 0, width, -1, 1);
-	let zeroes = new Array(receivedXs.length);
-	for(let i = 0; i < zeroes.length; i++)
-		zeroes[i] = 0;
 	let tensorXs = tf.tensor1d(receivedXs);
-	let tensorYs = tf.tensor1d(zeroes);
+	let tensorYs = tf.zeros([receivedXs.length]);
 	for(let i = 0; i < coefficients.length; i++){
 		tensorYs = tensorYs.add(tensorXs.pow(tf.scalar(i)).mul(coefficients[i]));
 	}
