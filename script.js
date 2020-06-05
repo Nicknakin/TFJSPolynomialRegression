@@ -13,7 +13,7 @@ const optimizer = tf.train.adam(learningRate);
 //GLOBAL VARIABLES
 
 function setup(){
-	createCanvas(800,800);
+	createCanvas(window.innerWidth,window.innerHeight);
 	button = createButton("Clear");
 	button.position(0, height+10);
 	button.mousePressed(() => {realXs = []; realYs = [];});
